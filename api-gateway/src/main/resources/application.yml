@@ -1,0 +1,28 @@
+server:
+  port: 8080  # API Gateway runs on port 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true   # Automatically discover services from Eureka
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service   # Load balancing to user-service
+          predicates:
+            - Path=/users/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true

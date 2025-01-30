@@ -5,6 +5,11 @@ spring:
   application:
     name: api-gateway
 
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090  # Spring Boot Admin Server URL
+
   cloud:
     gateway:
       discovery:
@@ -16,6 +21,8 @@ spring:
           uri: lb://user-service   # Load balancing to user-service
           predicates:
             - Path=/users/**
+    inetutils:
+      ignored-interfaces: eth0, wlan0
 
 eureka:
   client:
@@ -26,3 +33,12 @@ eureka:
 
   instance:
     prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Expose all Actuator endpoints
+  endpoint:
+    health:
+      show-details: always  # Show detailed health status

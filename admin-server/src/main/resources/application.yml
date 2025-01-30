@@ -1,0 +1,13 @@
+server:
+  port: 9090  # Admin server runs on port 9090
+
+spring:
+  application:
+    name: admin-server
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true

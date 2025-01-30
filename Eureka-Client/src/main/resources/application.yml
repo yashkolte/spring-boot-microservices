@@ -5,6 +5,11 @@ spring:
   application:
     name: user-service
 
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090  # Admin Server URL
+
 eureka:
   client:
     service-url:
@@ -12,5 +17,19 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
 
+  healthcheck:
+    enabled: true
+
   instance:
     prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Expose all actuator endpoints
+  endpoint:
+    health:
+      show-details: always  # Show detailed health status
+    shutdown:
+      enabled: true

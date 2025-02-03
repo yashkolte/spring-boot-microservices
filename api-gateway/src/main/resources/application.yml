@@ -21,8 +21,6 @@ spring:
           uri: lb://user-service   # Load balancing to user-service
           predicates:
             - Path=/users/**
-    inetutils:
-      ignored-interfaces: eth0, wlan0
 
 eureka:
   client:

@@ -17,9 +17,6 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
 
-  healthcheck:
-    enabled: true
-
   instance:
     prefer-ip-address: true
 
@@ -31,5 +28,4 @@ management:
   endpoint:
     health:
       show-details: always  # Show detailed health status
-    shutdown:
-      enabled: true
+

@@ -3,11 +3,38 @@ server:
 
 spring:
   application:
-    name: admin-server
+    name: spring-admin
+
+  boot:
+    admin:
+      discovery:
+        enabled: true  # Enable discovery for monitored services
+#        include: '*'   # Include all instances registered in Eureka (optional)
+        ignored-services: ['unknown-service', 'INDL-9JPSMG3']
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
+    register-with-eureka: true  # Register admin server with Eureka
+    fetch-registry: true        # Fetch service registry from Eureka
+
+  instance:
+    prefer-ip-address: true  # Ensure Eureka registers the IP address
+    hostname: localhost      # Specify the hostname if required
+    metadata-map:
+      management.port: 9090  # Explicitly set management port
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Ensure all actuator endpoints are exposed
+
+  endpoint:
+    health:
+      show-details: always  # Include detailed health status
+
+logging:
+  level:
+    org.springframework.boot: DEBUG  # Optional: Enable debug logging for troubleshooting

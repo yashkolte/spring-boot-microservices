@@ -10,6 +10,8 @@ import java.util.List;
 public class UserController {
     private List<String> users = new ArrayList<>(Arrays.asList("Alice", "Bob", "Charlie"));
 
+
+
     @GetMapping("/all")
     public List<String> getUsers() {
         return users;

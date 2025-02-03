@@ -1,117 +1,187 @@
-# Spring Boot Microservices with Eureka & API Gateway
+# Spring Cloud Microservices Architecture
 
-## 📌 Overview
-This project demonstrates a **microservices architecture** using **Spring Boot**, **Spring Cloud Eureka**, and **Spring Cloud Gateway**. The system consists of:
+This project demonstrates a microservices architecture using Spring Cloud components, including Eureka Server, API Gateway, User Service, and Spring Boot Admin for monitoring.
 
-1. **Eureka Server** (Service Registry) - Centralized registry for service discovery.
-2. **User Service** - A microservice that provides user-related endpoints.
-3. **API Gateway** (Load Balancer) - Routes requests to microservices and provides load balancing.
+## Project Structure
 
----
-
-## 🚀 Tech Stack
-- **Java 17+**
-- **Spring Boot**
-- **Spring Cloud Eureka (Service Discovery)**
-- **Spring Cloud Gateway (API Gateway & Load Balancer)**
-- **Maven**
+- **Eureka Server**: Service discovery for all microservices.
+- **API Gateway**: Load balancer and request router for microservices.
+- **User Service**: A simple service registered with Eureka Server.
+- **Spring Boot Admin**: Monitoring and managing Spring Boot applications.
 
 ---
 
-## 🏗️ Project Structure
-```plaintext
-microservices-project/
-│── eureka-server/      # Eureka Service Registry
-│── user-service/       # User microservice
-│── api-gateway/        # API Gateway (Load Balancer)
-```
+## Prerequisites
+
+Before running the project, ensure you have the following installed:
+
+- Java 11 or later
+- Maven 3.6+
+- Docker (optional, for containerized deployment)
 
 ---
 
-## 🔧 Setup Instructions
-### 1️⃣ Clone the Repository
+## Setup Instructions
+
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/yashkolte/SpringBootMicroservices.git
-cd SpringBootMicroservices
+git clone https://github.com/your-repo/microservices-architecture.git
+cd microservices-architecture
 ```
 
-### 2️⃣ Build the Project
-Run the following command in the **root directory**:
+### 2. Build All Services
+Build all services using Maven:
 ```bash
-mvn clean package
+mvn clean install
 ```
 
----
-
-## 📌 Microservices Setup
-### **1. Start Eureka Server**
+### 3. Start the Eureka Server
 Navigate to the `eureka-server` directory and run:
 ```bash
 cd eureka-server
 mvn spring-boot:run
 ```
-- ✅ Check Eureka Dashboard: [http://localhost:8761](http://localhost:8761)
+Eureka Server will be available at [http://localhost:8761](http://localhost:8761).
 
-### **2. Start Eureka Client**
-Navigate to `eureka-client` and run:
+### 4. Start the Spring Boot Admin Server
+Navigate to the `spring-admin` directory and run:
 ```bash
-cd ../eureka-client
+cd spring-admin
 mvn spring-boot:run
 ```
-- ✅ Check API: [http://localhost:8081/users/all](http://localhost:8081/users/all)
+Spring Boot Admin will be available at [http://localhost:9090](http://localhost:9090).
 
-### **3. Start API Gateway**
-Navigate to `api-gateway` and run:
+### 5. Start the API Gateway
+Navigate to the `api-gateway` directory and run:
 ```bash
-cd ../api-gateway
+cd api-gateway
 mvn spring-boot:run
 ```
-- ✅ Access API through Gateway: [http://localhost:8080/users/all](http://localhost:8080/users/all)
+API Gateway will be available at [http://localhost:8080](http://localhost:8080).
+
+### 6. Start the User Service
+Navigate to the `user-service` directory and run:
+```bash
+cd user-service
+mvn spring-boot:run
+```
+User Service will be available at [http://localhost:8081](http://localhost:8081).
 
 ---
 
-## 🛠️ API Endpoints
-### **User Service API** (Direct)
-- `GET /users/all` → Fetch all users
-- `POST /users/add?name=John` → Add a user
+## Configuration
 
-### **API Gateway (Load Balanced Routes)**
-- `GET http://localhost:8080/users/all` → **(via API Gateway)**
-- `POST http://localhost:8080/users/add?name=John` → **(via API Gateway)**
-
----
-
-## 🔥 Troubleshooting
-### ❌ **API Gateway Error: No servers available for service: user-service**
-✅ Ensure User Service is registered in Eureka:
-- Check **http://localhost:8761** to see registered services.
-- Restart services in this order:
-  1. **Eureka Server**
-  2. **User Service**
-  3. **API Gateway**
-
-### ❌ **Spring Cloud Gateway Error (WebApplicationType)**
-✅ Ensure `api-gateway` does NOT have `spring-boot-starter-web` in `pom.xml`.
-✅ Ensure `application.yml` contains:
+### Eureka Server
+`application.yml` for Eureka Server:
 ```yaml
+server:
+  port: 8761
+
+eureka:
+  server:
+    eviction-interval-timer-in-ms: 5000
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+```
+
+### Spring Boot Admin
+`application.yml` for Spring Boot Admin:
+```yaml
+server:
+  port: 9090
+
 spring:
-  main:
-    web-application-type: reactive
+  application:
+    name: spring-admin
+
+  boot:
+    admin:
+      discovery:
+        enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+```
+
+### API Gateway
+`application.yml` for API Gateway:
+```yaml
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+```
+
+### User Service
+`application.yml` for User Service:
+```yaml
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true
 ```
 
 ---
 
-## 🎯 Next Steps
-- ✅ Add more microservices (e.g., Order Service, Payment Service)
-- ✅ Secure APIs with **Spring Security & JWT**
-- ✅ Implement **Circuit Breaker (Resilience4j)**
+## How to Access the Services
+
+- **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)
+- **Spring Boot Admin**: [http://localhost:9090](http://localhost:9090)
+- **API Gateway**: [http://localhost:8080](http://localhost:8080)
+- **User Service**: [http://localhost:8081](http://localhost:8081)
 
 ---
 
-## 📜 License
-This project is licensed under the **MIT License**.
+## Common Issues
+
+### 1. Offline Instances in Spring Boot Admin
+- Ensure all services are correctly registered in Eureka.
+- Verify `management.endpoints.web.exposure.include` includes `health` and `info`.
+- Restart services if stale instances are present in the registry.
+
+### 2. Failed to Resolve Hostname
+- Add `prefer-ip-address: true` in the `application.yml` of services.
+- Replace any hardcoded hostnames with `localhost`.
 
 ---
 
-🚀 **Happy Coding!**
-
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

@@ -5,12 +5,11 @@ spring:
   application:
     name: spring-admin
 
-  boot:
-    admin:
-      discovery:
-        enabled: true  # Enable discovery for monitored services
-#        include: '*'   # Include all instances registered in Eureka (optional)
-        ignored-services: ['unknown-service', 'INDL-9JPSMG3']
+  # boot:
+  #   admin:
+  #     discovery:
+  #       enabled: true  # Enable discovery for monitored services
+  #       ignored-services: ['unknown-service', 'INDL-9JPSMG3', 'http://INDL-9JPSMG3.estuate.com:8081/','http://INDL-9JPSMG3.estuate.com:8080/']
 
 eureka:
   client:

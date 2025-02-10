@@ -1,42 +1,59 @@
 server:
-  port: 8080  # API Gateway runs on port 8080
+  port: 8080
 
 spring:
   application:
     name: api-gateway
-
+  security:
+    user:
+      name: admin
+      password: admin  # Change in production
   boot:
     admin:
       client:
-        url: http://localhost:9090  # Spring Boot Admin Server URL
-
+        url: http://localhost:9090/admin
+        instance:
+          service-host-type: ip
+        username: admin
+        password: admin
   cloud:
     gateway:
       discovery:
         locator:
-          enabled: true   # Automatically discover services from Eureka
+          enabled: true
           lower-case-service-id: true
       routes:
         - id: user-service
-          uri: lb://user-service   # Load balancing to user-service
+          uri: lb://user-service
           predicates:
             - Path=/users/**
+          filters:
+            - StripPrefix=1
+        - id: quiz-question-service
+          uri: lb://quiz-question-service
+          predicates:
+            - Path=/quiz/**
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka:password@localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-
+    registry-fetch-interval-seconds: 5
   instance:
     prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    instance-id: ${spring.application.name}:${random.uuid}
+    metadata-map:
+      user.name: ${spring.security.user.name}
+      user.password: ${spring.security.user.password}
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"  # Expose all Actuator endpoints
+        include: "*"
   endpoint:
     health:
-      show-details: always  # Show detailed health status
+      show-details: always

@@ -1,39 +1,37 @@
 server:
-  port: 9090  # Admin server runs on port 9090
+  port: 9090
 
 spring:
   application:
     name: spring-admin
-
-  # boot:
-  #   admin:
-  #     discovery:
-  #       enabled: true  # Enable discovery for monitored services
-  #       ignored-services: ['unknown-service', 'INDL-9JPSMG3', 'http://INDL-9JPSMG3.estuate.com:8081/','http://INDL-9JPSMG3.estuate.com:8080/']
+  security:
+    user:
+      name: admin
+      password: admin
+  boot:
+    admin:
+      discovery:
+        enabled: true
+      ui:
+        title: "Spring Boot Admin"
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true  # Register admin server with Eureka
-    fetch-registry: true        # Fetch service registry from Eureka
-
+      defaultZone: http://eureka:password@localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
   instance:
-    prefer-ip-address: true  # Ensure Eureka registers the IP address
-    hostname: localhost      # Specify the hostname if required
+    prefer-ip-address: true
     metadata-map:
-      management.port: 9090  # Explicitly set management port
+      user.name: ${spring.security.user.name}
+      user.password: ${spring.security.user.password}
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"  # Ensure all actuator endpoints are exposed
-
+        include: "*"
   endpoint:
     health:
-      show-details: always  # Include detailed health status
-
-logging:
-  level:
-    org.springframework.boot: DEBUG  # Optional: Enable debug logging for troubleshooting
+      show-details: always
